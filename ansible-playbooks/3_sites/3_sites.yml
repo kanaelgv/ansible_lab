@@ -10,10 +10,20 @@
     
 # Nginx Configuration
 
-    - name: Sets Nginx conf file
+    - name: Sets Nginx conf file droll
       template:
-        src: "files/nginx.conf.j2"
-        dest: "/etc/nginx/sites-available/{{ http_conf }}"
+        src: "files/droll.conf.j2"
+        dest: "/etc/nginx/sites-available/droll.conf"
+
+    - name: Sets Nginx conf file drifting
+      template:
+        src: "files/drifting.conf.j2"
+        dest: "/etc/nginx/sites-available/drifting.conf"
+
+    - name: Sets Nginx conf file dreamy
+      template:
+        src: "files/dreamy.conf.j2"
+        dest: "/etc/nginx/sites-available/dreamy.conf"      
 
     - name: Sets index file
       template:
@@ -22,11 +32,25 @@
 
     - name: Enables new site
       file:
-        src: "/etc/nginx/sites-available/{{ http_conf }}"
-        dest: "/etc/nginx/sites-enabled/{{ http_conf }}"
+        src: "/etc/nginx/sites-available/dreamy.conf"
+        dest: "/etc/nginx/sites-enabled/dreamy.conf"
         state: link
       notify: Reload Nginx
-    
+
+    - name: Enables new site
+      file:
+        src: "/etc/nginx/sites-available/drifting.conf"
+        dest: "/etc/nginx/sites-enabled/drifting.conf"
+        state: link
+      notify: Reload Nginx
+
+    - name: Enables new site
+      file:
+        src: "/etc/nginx/sites-available/droll.conf"
+        dest: "/etc/nginx/sites-enabled/droll.conf"
+        state: link
+      notify: Reload Nginx 
+
     - name: Removes "default" site
       file:
         path: "/etc/nginx/sites-enabled/default"
@@ -56,7 +80,7 @@
 
 
 #site deploy
-#
+#site1
 
     - name: Create site folder
       file:
@@ -72,6 +96,42 @@
     - name: Extract droll.tar.gz to www/html/droll
       unarchive:
         src: "/var/www/html/droll.tar.gz"
+        dest: "/var/www/html"
+        remote_src: yes
+
+#site2 drifting
+    - name: Create site folder drifting
+      file:
+        path: "/var/www/html/drifting"
+        state: directory
+
+
+    - name: Copy site arhive
+      copy:
+        src: "sites/drifting.tar.gz"
+        dest: "/var/www/html/drifting.tar.gz"
+
+    - name: Extract drifting.tar.gz to www/html/drifting
+      unarchive:
+        src: "/var/www/html/drifting.tar.gz"
+        dest: "/var/www/html"
+        remote_src: yes
+
+#site3
+    - name: Create site folder dreamy
+      file:
+        path: "/var/www/html/dreamy"
+        state: directory
+
+
+    - name: Copy site arhive
+      copy:
+        src: "sites/dreamy.tar.gz"
+        dest: "/var/www/html/dreamy.tar.gz"
+
+    - name: Extract dreamy.tar.gz to www/html/dreamy
+      unarchive:
+        src: "/var/www/html/dreamy.tar.gz"
         dest: "/var/www/html"
         remote_src: yes
 

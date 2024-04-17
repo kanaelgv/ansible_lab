@@ -1,12 +1,11 @@
 server {
         listen {{ http_port }};
        
-        server_name {{ http_host }};
-
-        location / {
-                try_files $uri $uri/ =404;
+        server_name droll;
                  root /var/www/html/droll;
                  index index.php index.html index.htm;
+        location / {
+                try_files $uri $uri/ =404;
         }
 
         location ~ \.php$ {
