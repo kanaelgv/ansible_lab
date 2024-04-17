@@ -1,0 +1,52 @@
+##################################################
+# DO Community Playbooks: LAMP on Ubuntu 18.04
+##################################################
+---
+- hosts: db
+  vars_files:
+    - vars/default.yml
+
+  tasks:
+
+
+  #Apache Configuration
+    - name: Install LAMP Packages
+      apt: name={{ item }} update_cache=yes state=latest
+      loop: [ 'python3-pymysql' , 'mysql-server' ]
+      
+    - name: start mysql
+      command: service mysql start
+
+    - name: sleep
+      shell: sleep 10
+
+    - name: check status mysql
+      command: service mysql status
+      register: mysql_service_status
+
+    - name: Debug
+      debug:
+        var: mysql_service_status
+
+  # MySQL Configuration
+    - name: Sets the root password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        # login_host: localhost
+
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Removes the MySQL test database
+      mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"

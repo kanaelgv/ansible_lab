@@ -1,0 +1,59 @@
+version: '3.5'
+
+networks:
+  lab_network:
+    driver: bridge
+    name: "lab_network"
+
+services:
+
+  ansible:
+    image: ans
+    hostname: ansible
+    container_name: ans
+    volumes:
+      - ./:/ans
+    networks:
+      - lab_network
+    ports:
+      - "9000:22"
+    command: sleep infinity
+
+  front:
+    image: my-ub
+    hostname: front
+    container_name: front
+    environment:
+      test1: test1
+    networks:
+      - lab_network
+    ports: 
+      - "9001:22"
+      - "8181:80"
+    restart: always
+
+  back:
+    image: my-ub
+    hostname: back
+    container_name: back
+    environment:
+      test1: test1
+    networks:
+      - lab_network
+    ports:
+      - "9002:22"
+    restart: always
+  
+
+  db:
+    image: my-ub
+    hostname: db
+    container_name: db
+    environment:
+      test1: test1
+    networks:
+      - lab_network
+    ports:
+      - "9003:22"
+      - "3306:3306"
+    restart: always
