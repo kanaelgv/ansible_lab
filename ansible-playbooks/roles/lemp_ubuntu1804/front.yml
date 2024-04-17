@@ -1,0 +1,69 @@
+##################################################
+# DO Community Playbooks: LEMP on Ubuntu 18.04
+##################################################
+---
+- hosts: front
+  vars_files:
+    - vars/default.yml
+
+  tasks:
+    - name: Install nginx Packages
+      apt: name={{ item }} update_cache=yes state=latest
+      loop: [ 'nginx' ]
+    
+# Nginx Configuration
+
+    # Sets Up PHP Info Page
+    - name: Sets Up PHP Info Page
+      template:
+        src: "files/info.php.j2"
+        dest: "/var/www/html/info.php"
+    
+    - name: Sets Nginx conf file
+      template:
+        src: "files/nginx.conf.j2"
+        dest: "/etc/nginx/sites-available/{{ http_conf }}"
+
+    - name: Sets index file
+      template:
+        src: "templates/index.j2"
+        dest: "/var/www/html/index.html"
+
+    - name: Enables new site
+      file:
+        src: "/etc/nginx/sites-available/{{ http_conf }}"
+        dest: "/etc/nginx/sites-enabled/{{ http_conf }}"
+        state: link
+      notify: Reload Nginx
+    
+    - name: Removes "default" site
+      file:
+        path: "/etc/nginx/sites-enabled/default"
+        state: absent
+      notify: Reload Nginx
+
+    - name: start nginx
+      command: service nginx start
+
+    - name: sleep
+      shell: sleep 10
+
+    - name: check status nginx
+      command: service nginx status
+      register: nginx_service_status
+
+    - name: Debug
+      debug:
+        var: nginx_service_status
+
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

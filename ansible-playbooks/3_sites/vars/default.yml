@@ -1,0 +1,6 @@
+---
+mysql_root_password: "123456"
+http_host: "domain"
+http_conf: "domain.conf"
+http_port: "80"
+my_var: "chtoto tam"

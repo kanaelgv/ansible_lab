@@ -1,0 +1,112 @@
+##################################################
+# DO Community Playbooks: LEMP on Ubuntu 18.04
+##################################################
+---
+- hosts: front
+  vars_files:
+    - vars/default.yml
+
+  tasks:
+    # - name: Install Prerequisites
+    #   apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+    #   loop: [ 'aptitude' ]
+
+    - name: Install LEMP Packages
+      apt: name={{ item }} update_cache=yes state=latest
+      loop: [ 'nginx', 'mysql-server', 'python3-pymysql', 'php-fpm', 'php-mysql' ]
+    
+# Nginx Configuration
+
+    - name: Sets Nginx conf file
+      template:
+        src: "files/nginx.conf.j2"
+        dest: "/etc/nginx/sites-available/{{ http_conf }}"
+
+    - name: Sets index file
+      template:
+        src: "templates/index.j2"
+        dest: "/var/www/html/index.html"
+
+    - name: Enables new site
+      file:
+        src: "/etc/nginx/sites-available/{{ http_conf }}"
+        dest: "/etc/nginx/sites-enabled/{{ http_conf }}"
+        state: link
+      notify: Reload Nginx
+    
+    - name: Removes "default" site
+      file:
+        path: "/etc/nginx/sites-enabled/default"
+        state: absent
+      notify: Reload Nginx
+
+    - name: start nginx
+      command: service nginx start
+
+    - name: sleep
+      shell: sleep 10
+
+    - name: check status nginx
+      command: service nginx status
+      register: nginx_service_status
+
+    - name: Debug
+      debug:
+        var: nginx_service_status
+
+ # MySQL Configuration
+    - name: start mysql
+      command: service mysql start
+
+    - name: sleep
+      shell: sleep 10
+
+    - name: check status mysql
+      command: service mysql status
+      register: mysql_service_status
+
+    - name: Debug
+      debug:
+        var: mysql_service_status
+
+    - name: Sets the root password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      ignore_errors: true
+
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Removes the MySQL test database
+      mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+ 
+
+
+# Sets Up PHP Info Page
+    - name: Sets Up PHP Info Page
+      template:
+        src: "files/info.php.j2"
+        dest: "/var/www/html/info.php"
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

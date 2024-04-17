@@ -1,0 +1,25 @@
+##################################################
+# DO Community Playbooks: LEMP on Ubuntu 18.04
+##################################################
+---
+- hosts: back
+  vars_files:
+    - vars/default.yml
+
+  tasks:
+    - name: Install PHP Packages
+      apt: name={{ item }} update_cache=yes state=latest
+      loop: [ 'php-fpm', 'php-mysql' ]
+    
+
+# Sets Up PHP Info Page
+    - name: Creates directory
+      file:
+        path: /var/www/html
+        state: directory
+    
+    
+    - name: Sets Up PHP Info Page
+      template:
+        src: "files/info.php.j2"
+        dest: "/var/www/html/info.php"
