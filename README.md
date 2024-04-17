@@ -22,7 +22,7 @@ docker-compose up -d
 После запуска docker-compose зайти в контейнер с ансиблом 
 
 ```sh
-docker exec -it ansible-laba-ansible-1 bash
+docker exec -it ans bash
 ```
 
 и сгенерировать новый ssh ключ
